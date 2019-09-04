@@ -26,6 +26,8 @@ dependencies:
 
   video_player: ^0.10.2
   chewie: ^0.9.7
+  flutter_swiper: ^1.1.6
+  marquee_flutter: ^0.1.4
 
 dev_dependencies:
   flutter_test:
