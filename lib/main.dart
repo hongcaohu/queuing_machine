@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:marquee_flutter/marquee_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'components/sywlVideoPlayer.dart';
+import 'package:usb_serial/usb_serial.dart';
 
 void main() {
   runApp(MyApp());
@@ -42,8 +44,34 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List orderList = ["100号", "101号", "102号", "103号", "104号"];
   bool showAd = false;
+  String mm = "";
 
-  _incrementCounter() {
+  @override
+  void initState() {
+    print("initState...");
+    UsbSerial.usbEventStream.listen((UsbEvent msg) {
+      print(msg);
+      if (msg.event == UsbEvent.ACTION_USB_ATTACHED) {
+        // open a device now...
+        print(msg.device.toString());
+        print(msg.event);
+        setState(() {
+          mm = msg.device.toString();
+        });
+      }
+      if (msg.event == UsbEvent.ACTION_USB_DETACHED) {
+        //  close device now...
+      }
+    });
+  }
+
+  _incrementCounter() async {
+    String path = (await getExternalStorageDirectory()).path;
+    print("path: ${path}");
+    String sTempDir = (await getTemporaryDirectory()).path;
+    print("sTempDir: ${sTempDir}");
+    String sDocumentDir = (await getApplicationDocumentsDirectory()).path;
+    print("sDocumentDir: ${sDocumentDir}");
     setState(() {
       showAd = !showAd;
     });
@@ -67,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           fit: BoxFit.fill,
                         );
                       },
-                      duration: 40,
+                      duration: 1200,
                       itemCount: 3,
                       // pagination: new SwiperPagination(),
                       // control: new SwiperControl(),
@@ -96,6 +124,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
+                Container(
+                  child: Text(mm),
+                )
               ],
             ),
           ),
