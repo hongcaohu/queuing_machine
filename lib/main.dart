@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,6 +44,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List orderList = ["100号", "101号", "102号", "103号", "104号"];
+  String logo = ""; //logo路径
+  String videoPath = ""; //video路径
+  String marquee = ""; //滚动字幕
+  List imgPathList = []; //轮播图路径
+
   bool showAd = false;
   String mm = "";
 
@@ -63,17 +69,72 @@ class _MyHomePageState extends State<MyHomePage> {
         //  close device now...
       }
     });
+
+    _incrementCounter();
   }
 
   _incrementCounter() async {
-    String path = (await getExternalStorageDirectory()).path;
-    print("path: ${path}");
-    String sTempDir = (await getTemporaryDirectory()).path;
-    print("sTempDir: ${sTempDir}");
-    String sDocumentDir = (await getApplicationDocumentsDirectory()).path;
-    print("sDocumentDir: ${sDocumentDir}");
+    // setState(() {
+    //   showAd = !showAd;
+    // });
+    print("adfasd");
+    BasicMessageChannel channel = new BasicMessageChannel(
+        "sywl_basicMessageChannel", StandardMessageCodec());
+    String nativeDataDir = await channel.send("dir");
+    print("nativeDataDir: ${nativeDataDir}");
+
+    String res_base_path = nativeDataDir + "/sywl/res/";
+    Directory d = new Directory(res_base_path);
+    //
+    String _marquee = "";
+    String _logo = "";
+    List<String> _imgPaths = [];
+    String _videoPath = "";
+
+    try {
+      if (d.existsSync()) {
+        Stream<FileSystemEntity> entityList =
+            d.list(recursive: false, followLinks: false);
+        await for (FileSystemEntity entity in entityList) {
+          if (entity is File) {
+            if (entity.path.endsWith("txt")) {
+              //marquee滚动字幕
+              _marquee = (entity as File).readAsStringSync();
+            } else if (entity.path.endsWith("png") ||
+                entity.path.endsWith("jpg")) {
+              _logo = entity.path;
+            }
+          } else if (entity is Directory) {
+            Directory d = entity as Directory;
+            if (d.path.endsWith("imgs")) {
+              List<FileSystemEntity> imgsList =
+                  await d.list(recursive: false, followLinks: false).toList();
+              if (imgsList.length > 0) {
+                _imgPaths = imgsList.map((img) => (img as File).path).toList();
+              }
+            } else if (d.path.endsWith("videos")) {
+              List<FileSystemEntity> videoList =
+                  await d.list(recursive: false, followLinks: false).toList();
+              if (videoList.length > 0) {
+                _videoPath =
+                    videoList.map((img) => (img as File).path).toList()[0];
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {}
+
+    // String logo = "";//logo路径
+    // String videoPath = "";//video路径
+    // String marquee = "";//滚动字幕
+    // List imgPathList = [];//轮播图路径
+    print("asdfa: ${imgPathList}");
     setState(() {
-      showAd = !showAd;
+      logo = _logo;
+      marquee = _marquee;
+      videoPath = _videoPath;
+      imgPathList = _imgPaths;
     });
   }
 
@@ -90,13 +151,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.lightBlue,
                   child: new Swiper(
                       itemBuilder: (BuildContext context, int index) {
-                        return new Image.network(
-                          "http://via.placeholder.com/350x150",
-                          fit: BoxFit.fill,
-                        );
+                        print("index->: ${index}");
+                        if (imgPathList.length > 0) {
+                          return new Image.file(new File(imgPathList[index]));
+                        } else {
+                          return new Image.network(
+                            "http://via.placeholder.com/350x150",
+                            fit: BoxFit.fill,
+                          );
+                        }
                       },
                       duration: 1200,
-                      itemCount: 3,
+                      itemCount:
+                          imgPathList.length > 0 ? imgPathList.length : 1,
                       // pagination: new SwiperPagination(),
                       // control: new SwiperControl(),
                       autoplay: true),
@@ -118,7 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Container(
                     height: 30,
                     child: MarqueeWidget(
-                      text: "ListView即滚动列表控件，能将子控件组成可滚动的列表。当你需要排列的子控件超出容器大小",
+                      text: marquee,
                       textStyle: new TextStyle(fontSize: 20.0),
                       scrollAxis: Axis.horizontal,
                     ),
@@ -147,11 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             bottom:
                                 BorderSide(color: Colors.white, width: 2.0))),
                     height: 70,
-                    child: Center(
-                        child: Text(
-                      "LOGO",
-                      style: TextStyle(color: Colors.white),
-                    )),
+                    child: Center(child: new Image.file(new File(logo))),
                   ),
                   Container(
                     width: double.infinity,
