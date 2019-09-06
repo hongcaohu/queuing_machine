@@ -20,7 +20,6 @@ import com.github.mjdev.libaums.partition.Partition;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Locale;
 
@@ -130,7 +129,7 @@ public class MainActivity extends FlutterActivity {
                 logShow("Chunk size: " + fSize(fileSystem.getChunkSize()));
 
                 UsbFile root = fileSystem.getRootDirectory();
-                UsbFile[] files = root.listFiles();
+                /*UsbFile[] files = root.listFiles();
                 for (UsbFile file : files)
                     logShow("文件: " + file.getName());
 
@@ -143,7 +142,7 @@ public class MainActivity extends FlutterActivity {
                 OutputStream os = UsbFileStreamFactory.createBufferedOutputStream(newFile, fileSystem);
                 os.write(("hi_" + System.currentTimeMillis()).getBytes());
                 os.close();
-                logShow("写文件: " + newFile.getName());
+                logShow("写文件: " + newFile.getName());*/
 
                 // 读文件
                 // InputStream is = new UsbFileInputStream(newFile);
@@ -160,14 +159,22 @@ public class MainActivity extends FlutterActivity {
                 sdOut.close();
                 logShow("读文件: " + newFile.getName() + " ->复制到/sdcard/111/");*/
 
+                //开始同步U盘数据
+                this.sendToFlutter("begin");
+
                 //从指定目录读取文件（图片、视频、文字）等，存在android设备本地，用于app端展示
                 UsbFile[] syFiles = root.listFiles();
                 for(UsbFile f : syFiles) {
                     if(f.isDirectory() && "sywl".equals(f.getName())) {
+                        String base_path = this.getApplication().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).getPath();
                         InputStream is = UsbFileStreamFactory.createBufferedInputStream(f, fileSystem);
                         byte[] buffer = new byte[fileSystem.getChunkSize()];
                         int len;
-                        File sdFile = new File(this.getApplication().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS) + "/sywl/res/");
+                        File sdFile = new File(base_path + "/res/");
+                        //如果已经存在，先删除
+                        if(sdFile.exists()) {
+                            sdFile.delete();
+                        }
                         sdFile.mkdirs();
                         FileOutputStream sdOut = new FileOutputStream(sdFile.getAbsolutePath() + "/" + f.getName());
                         while ((len = is.read(buffer)) != -1) {
@@ -175,17 +182,22 @@ public class MainActivity extends FlutterActivity {
                         }
                         is.close();
                         sdOut.close();
-                        logShow("读文件: " + f.getName() + "->复制到" + this.getApplication().getDataDir().getAbsolutePath() + "/sywl/res/");
+                        logShow("读文件: " + f.getName() + "->复制到" + base_path + "/res/");
                     }
                 }
                 storageDevice.close();
+                //同步U盘数据完成
+                this.sendToFlutter("end");
             }
         } catch (Exception e) {
             logShow("错误: " + e);
         }
     }
 
-
+    private void sendToFlutter(String message) {
+        BasicMessageChannel messageChannel = new BasicMessageChannel(this.getFlutterView(), BASIC_CHANNEL_NAME, StandardMessageCodec.INSTANCE);
+        messageChannel.send(message);
+    }
 
     private void logShow(String message) {
         Log.d(message, "");
