@@ -30,6 +30,7 @@ dependencies:
   marquee_flutter: ^0.1.4
   path_provider: ^1.2.2
   usb_serial: ^0.2.3
+  flutter_tts: ^0.5.2
 
 dev_dependencies:
   flutter_test:

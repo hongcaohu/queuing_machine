@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:marquee_flutter/marquee_flutter.dart';
 // import 'package:path_provider/path_provider.dart';
 // import 'components/sywlVideoPlayer.dart';
@@ -49,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String marquee = ""; //滚动字幕
   List imgPathList = []; //轮播图路径
 
-  bool syncUdisk = true;
+  bool syncUdisk = false;
   bool showAd = false;
   String mm = "";
 
@@ -153,6 +154,14 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future _speak() async {
+    FlutterTts flutterTts = new FlutterTts();
+    await flutterTts.setLanguage("zh-CN");
+    await flutterTts.setVolume(1.0);
+    var result = await flutterTts.speak("请123号顾客取餐");
+    print("result -> ${result}");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 Container(
                   height: MediaQuery.of(context).size.height,
-                  color: Colors.lightBlue,
+                  color: Colors.grey[200],
                   child: new Swiper(
                       itemBuilder: (BuildContext context, int index) {
                         print("index->: ${index}");
@@ -277,9 +286,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: _speak,
         tooltip: 'Increment',
-        child: Icon(Icons.add),
+        child: Text("测试语音"),
       ),
     );
   }
