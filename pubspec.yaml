@@ -31,6 +31,9 @@ dependencies:
   path_provider: ^1.2.2
   usb_serial: ^0.2.3
   flutter_tts: ^0.5.2
+  auto_size_text: ^2.1.0
+  flutterautotext:
+    git: https://github.com/LiuC520/flutterautotext.git
 
 dev_dependencies:
   flutter_test:
