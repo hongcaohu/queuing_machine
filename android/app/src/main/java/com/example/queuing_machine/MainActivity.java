@@ -45,8 +45,8 @@ public class MainActivity extends FlutterActivity {
     private static final String ACTION_USB_PERMISSION = "com.example.queuing_machine.USB_PERMISSION";
     private UsbManager mUsbManager;
     private PendingIntent mPermissionIntent;
-    private BroadcastReceiver mUsbReceiver = new android.content.BroadcastReceiver() {
-        public void onReceive(android.content.Context context, android.content.Intent intent) {
+    private BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
             //android.util.Log.d(TAG, "onReceive: " + intent);
             String action = intent.getAction();
             if (action == null)

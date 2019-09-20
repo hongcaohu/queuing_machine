@@ -34,6 +34,9 @@ dependencies:
   auto_size_text: ^2.1.0
   flutterautotext:
     git: https://github.com/LiuC520/flutterautotext.git
+  scoped_model: ^1.0.1
+  flutter_material_color_picker: ^1.0.5
+  shared_preferences: ^0.5.3+4
 
 dev_dependencies:
   flutter_test:
