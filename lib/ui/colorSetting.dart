@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
+import 'package:queuing_machine/model/ColorModel.dart';
 import 'package:queuing_machine/model/MyColors.dart';
 import 'package:queuing_machine/utils/LocalStorage.dart';
 import 'package:queuing_machine/utils/LocalStorage.dart' as prefix0;
@@ -28,12 +29,32 @@ class ColorSettingState extends State<ColorSetting> {
   Color _tempBottomBg;
 
   List bgcolors = [
-    {"key": "baseBg", "name": "背景色"},
+    {"key": "baseBg", "name": "基础背景色"},
     {"key": "logoBg", "name": "标题背景色"},
     {"key": "jhBg", "name": "呼叫已至背景色"},
     {"key": "numberBg", "name": "号码显示区背景色"},
     {"key": "bottomBg", "name": "底部背景色"}
   ];
+  MyColors mycolors = MyColors.fromDefault();
+  //初始化
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((e) {
+      getColorModel();
+    });
+  }
+
+  getColorModel() async {
+    ColorModel model = ColorModel().of(_key.currentContext);
+    MyColors _mycolors = await model.colors;
+    setState(() {
+      this.mycolors = _mycolors;
+      this._baseBg = _mycolors.baseBg;
+      this._logoBg = _mycolors.logoBg;
+      this._jhBg = _mycolors.jhBg;
+      this._numberBg = _mycolors.numberBg;
+      this._bottomBg = _mycolors.bottomBg;
+    });
+  }
 
   Map getColor(String key) {
     Map _color = {};
@@ -115,7 +136,8 @@ class ColorSettingState extends State<ColorSetting> {
     }
   }
 
-  void _openDialog(String type, Map colors, String title, Widget content) {
+  void _openDialog(BuildContext context, String type, Map colors, String title,
+      Widget content) {
     showDialog(
       context: context,
       builder: (_) {
@@ -125,11 +147,11 @@ class ColorSettingState extends State<ColorSetting> {
           content: content,
           actions: [
             FlatButton(
-              child: Text('CANCEL'),
+              child: Text('取消'),
               onPressed: Navigator.of(context).pop,
             ),
             FlatButton(
-              child: Text('SUBMIT'),
+              child: Text('确定'),
               onPressed: () {
                 Navigator.of(context).pop();
                 changeColor(type, colors["temp"]);
@@ -141,8 +163,9 @@ class ColorSettingState extends State<ColorSetting> {
     );
   }
 
-  void _openColorPicker(String type, Map colors) async {
+  void _openColorPicker(String type, Map colors, BuildContext context) async {
     _openDialog(
+      context,
       type,
       colors,
       "Color picker",
@@ -155,25 +178,10 @@ class ColorSettingState extends State<ColorSetting> {
     );
   }
 
-
-  // Color _baseBg; //背景色
-  // Color _tempBaseBg;
-
-  // Color _logoBg; //标题背景色
-  // Color _tempLogoBg;
-
-  // Color _jhBg; //呼叫已至背景色
-  // Color _tempJhBg;
-
-  // Color _numberBg; //号码显示区域背景色
-  // Color _tempNumberBg;
-
-  // Color _bottomBg; //最下面显示的背景色
-  // Color _tempBottomBg;
-  void saveColorSetting() {
-
-    MyColors myColor = MyColors.fromInt(_baseBg?.value, _logoBg?.value, _jhBg?.value, _numberBg?.value,_bottomBg?.value);
-    LocalStorage.setJSON("colors", myColor);
+  void saveColorSetting(BuildContext context) {
+    // MyColors myColor = MyColors.fromInt(_baseBg?.value, _logoBg?.value,
+    //     _jhBg?.value, _numberBg?.value, _bottomBg?.value);
+    // LocalStorage.setJSON("colors", myColor);
     //保存设置的背景颜色
     LocalStorage.set("_baseBg", _baseBg?.value?.toString());
     LocalStorage.set("_logoBg", _logoBg?.value?.toString());
@@ -182,18 +190,26 @@ class ColorSettingState extends State<ColorSetting> {
     LocalStorage.set("_bottomBg", _bottomBg?.value?.toString());
 
     //更新状态数据
-
+    ColorModel model = ColorModel().of(context);
+    model.changeColors(MyColors.fromInt(_baseBg?.value, _logoBg?.value,
+        _jhBg?.value, _numberBg?.value, _bottomBg?.value));
+    Navigator.of(context).pop();
   }
 
+  GlobalKey _key = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _key,
       appBar: AppBar(
         title: Text("颜色设置"),
         actions: <Widget>[
           FlatButton(
-            onPressed: () => saveColorSetting(),
-            child: Text("保存", style: TextStyle(color: Colors.white),),
+            onPressed: () => saveColorSetting(context),
+            child: Text(
+              "保存",
+              style: TextStyle(color: Colors.white),
+            ),
           )
         ],
       ),
@@ -206,8 +222,9 @@ class ColorSettingState extends State<ColorSetting> {
             child: Text("背景色"),
           ),
           ...bgcolors.map((item) => ListTile(
-              onTap: () => _openColorPicker(item["key"], getColor(item["key"])),
-              title: Text(item["key"]),
+              onTap: () =>
+                  _openColorPicker(item["key"], getColor(item["key"]), context),
+              title: Text(item["name"]),
               subtitle: Text(item["name"]),
               trailing: CircleAvatar(
                 backgroundColor: getColor(item["key"])["color"],

@@ -8,6 +8,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:marquee_flutter/marquee_flutter.dart';
 import 'package:flutterautotext/flutterautotext.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:queuing_machine/model/MyColors.dart';
 import 'package:queuing_machine/ui/colorSetting.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -78,6 +79,9 @@ class _MyHomePageState extends State<MyHomePage> {
   bool syncUdisk = false;
   bool showAd = false;
   String mm = "";
+  MyColors mycolors = MyColors.fromDefault();
+  ColorModel model;
+  GlobalKey _key = GlobalKey();
 
   @override
   void initState() {
@@ -97,7 +101,18 @@ class _MyHomePageState extends State<MyHomePage> {
     //   }
     // });
 
+    WidgetsBinding.instance.addPostFrameCallback((e) {
+      //getColorModel();
+    });
     _incrementCounter();
+  }
+
+  getColorModel(BuildContext context) async {
+    ColorModel model = ColorModel().of(context);
+    MyColors _mycolors = await model.colors;
+    setState(() {
+      this.mycolors = _mycolors;
+    });
   }
 
   _incrementCounter() async {
@@ -189,7 +204,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    getColorModel(context);
     return Scaffold(
+      key: _key,
       body: Row(
         children: <Widget>[
           Expanded(
@@ -251,138 +268,130 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-          ScopedModelDescendant<ColorModel>(
-            builder: (BuildContext context, Widget child, ColorModel model) {
-              return Container(
-                  width: 250,
-                  height: MediaQuery.of(context).size.height,
-                  decoration: BoxDecoration(
-                    color: model.colors.baseBg
-                    //color: Color.fromARGB(255, 163, 170, 173),
-                    //border: Border.all(width: 2.0, color: Colors.white),
-                  ),
-                  child: Column(
-                    children: <Widget>[
-                      InkWell(
-                        onTap: () =>
-                            Navigator.pushNamed(context, '/colorSetting'),
-                        child: Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 71, 74, 79)),
-                          // decoration: BoxDecoration(
-                          //     border: Border(
-                          //         bottom:
-                          //             BorderSide(color: Colors.white, width: 2.0))),
-                          height: 90,
-                          child: Center(
-                              child: Text(
-                            "时熙物联",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 40,
-                                fontWeight: FontWeight.w700),
-                          )),
-                        ),
-                      ),
-                      Container(
-                          width: 242,
-                          margin: EdgeInsets.only(top: 4),
-                          padding: EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5))),
-                          height: 70,
-                          child: Flex(
-                            direction: Axis.horizontal,
-                            children: <Widget>[
-                              Expanded(
-                                flex: 1,
-                                child: Icon(
-                                  Icons.lens,
-                                  color: Color.fromARGB(255, 235, 103, 0),
-                                  size: 20,
-                                ),
-                              ),
-                              Expanded(
-                                flex: 3,
-                                child: Text("呼叫已至",
-                                    style: TextStyle(
-                                        fontSize: 25,
-                                        color: Color.fromARGB(
-                                            255, 251, 255, 222))),
-                              )
-                            ],
-                          )),
-                      Expanded(
-                          child: Container(
-                        width: 242,
-                        margin: EdgeInsets.only(top: 4, bottom: 4),
-                        decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 71, 74, 79),
-                            borderRadius: BorderRadius.all(Radius.circular(5))),
-                        child: Wrap(
-                            children: orderList
-                                .map(
-                                  (item) => Container(
-                                    width: 115,
-                                    padding: EdgeInsets.symmetric(vertical: 8),
-                                    child: Center(
-                                        child: Text(
-                                      item,
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 35),
-                                    )),
-                                  ),
-                                )
-                                .toList()),
+          Container(
+              width: 250,
+              height: MediaQuery.of(context).size.height,
+              decoration: BoxDecoration(
+                color: mycolors.baseBg
+                //color: Color.fromARGB(255, 163, 170, 173),
+                //border: Border.all(width: 2.0, color: Colors.white),
+              ),
+              child: Column(
+                children: <Widget>[
+                  InkWell(
+                    onTap: () => Navigator.pushNamed(context, '/colorSetting'),
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(10),
+                      decoration:
+                          BoxDecoration(color: mycolors.logoBg),
+                      // decoration: BoxDecoration(
+                      //     border: Border(
+                      //         bottom:
+                      //             BorderSide(color: Colors.white, width: 2.0))),
+                      height: 90,
+                      child: Center(
+                          child: Text(
+                        "时熙物联",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 40,
+                            fontWeight: FontWeight.w700),
                       )),
-                      Container(
-                        width: 242,
-                        margin: EdgeInsets.only(bottom: 4),
-                        padding: EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 140, 149, 154),
-                            borderRadius: BorderRadius.all(Radius.circular(5))),
-                        height: 50,
-                        child: Flex(
-                          direction: Axis.horizontal,
-                          children: <Widget>[
-                            Icon(
+                    ),
+                  ),
+                  Container(
+                      width: 242,
+                      margin: EdgeInsets.only(top: 4),
+                      padding: EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                          color: mycolors.jhBg,
+                          borderRadius: BorderRadius.all(Radius.circular(5))),
+                      height: 70,
+                      child: Flex(
+                        direction: Axis.horizontal,
+                        children: <Widget>[
+                          Expanded(
+                            flex: 1,
+                            child: Icon(
                               Icons.lens,
                               color: Color.fromARGB(255, 235, 103, 0),
                               size: 20,
                             ),
-                            // AutoSizeText(
-                            //   'This string will be automatically resized to fit in two lines.',
-                            //   style: TextStyle(fontSize: 30.0),
-                            //   maxLines: 2,
-                            // ),
-                            Expanded(
-                              child: FlutterAutoText(
-                                  width: 200, //这个是必须的
-                                  text: "新品上市, 优优惠多多优优优惠新品",
-                                  textStyle: TextStyle(
-                                      fontSize: 20,
-                                      color:
-                                          Color.fromARGB(255, 251, 255, 222))),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Text("呼叫已至",
+                                style: TextStyle(
+                                    fontSize: 25,
+                                    color: Color.fromARGB(255, 251, 255, 222))),
+                          )
+                        ],
+                      )),
+                  Expanded(
+                      child: Container(
+                    width: 242,
+                    margin: EdgeInsets.only(top: 4, bottom: 4),
+                    decoration: BoxDecoration(
+                        color: mycolors.numberBg,
+                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                    child: Wrap(
+                        children: orderList
+                            .map(
+                              (item) => Container(
+                                width: 115,
+                                padding: EdgeInsets.symmetric(vertical: 8),
+                                child: Center(
+                                    child: Text(
+                                  item,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 35),
+                                )),
+                              ),
                             )
-                          ],
+                            .toList()),
+                  )),
+                  Container(
+                    width: 242,
+                    margin: EdgeInsets.only(bottom: 4),
+                    padding: EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                        color: mycolors.bottomBg,
+                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                    height: 50,
+                    child: Flex(
+                      direction: Axis.horizontal,
+                      children: <Widget>[
+                        Icon(
+                          Icons.lens,
+                          color: Color.fromARGB(255, 235, 103, 0),
+                          size: 20,
                         ),
-                      ),
-                    ],
-                  ));
-            },
-          )
+                        // AutoSizeText(
+                        //   'This string will be automatically resized to fit in two lines.',
+                        //   style: TextStyle(fontSize: 30.0),
+                        //   maxLines: 2,
+                        // ),
+                        Expanded(
+                          child: FlutterAutoText(
+                              width: 200, //这个是必须的
+                              text: "新品上市, 优优惠多多优优优惠新品",
+                              textStyle: TextStyle(
+                                  fontSize: 20,
+                                  color: Color.fromARGB(255, 251, 255, 222))),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ))
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _speak,
-        tooltip: 'Increment',
-        child: Text("测试语音"),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _speak,
+      //   tooltip: 'Increment',
+      //   child: Text("测试语音"),
+      // ),
     );
   }
 }

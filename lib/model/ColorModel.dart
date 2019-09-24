@@ -16,7 +16,7 @@ class ColorModel extends Model{
     return _colors;
   }
   
-  void increment(MyColors colors){
+  void changeColors(MyColors colors){
     _colors = colors;
     notifyListeners();
   }
@@ -34,4 +34,6 @@ class ColorModel extends Model{
     int bottomBg = int.parse((await LocalStorage.get("_bottomBg"))??Color.fromARGB(255, 140, 149, 154).value.toString());
     return MyColors.fromInt(baseBg, logoBg, jhBg, numberBg, bottomBg);
   }
+
+  ColorModel of(context) => ScopedModel.of<ColorModel>(context, rebuildOnChange: true);
 }

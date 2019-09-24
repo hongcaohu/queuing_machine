@@ -20,5 +20,13 @@ class MyColors {
     this._numberBg = Color(numberBg);
     this._bottomBg = Color(bottomBg);
   }
-  
+
+  MyColors.fromDefault() {
+    this._baseBg = Color.fromARGB(255, 163, 170, 173);
+    this._logoBg = Color.fromARGB(255, 71, 74, 79);
+    this._jhBg = Colors.black;
+    this._numberBg = Color.fromARGB(255, 71, 74, 79);
+    this._bottomBg = Color.fromARGB(255, 140, 149, 154);
+  }
+
 }
